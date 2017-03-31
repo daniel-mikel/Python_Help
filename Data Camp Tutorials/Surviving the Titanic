@@ -1,0 +1,153 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Mar 18 19:43:20 2017
+
+@author: dan
+"""
+
+
+#DataCamp tutorial on Python, Pandas, and Machine Learning
+    #https://campus.datacamp.com/courses/kaggle-python-tutorial-on-machine-learning/getting-started-with-python?ex=2
+
+#Came to this tutorial from a Surviving the Titanic  from Kaggle
+    #https://www.kaggle.com/aturner/titanic/exploring-survival-on-the-titanic
+    
+#From a list of Data Challenges for beginning Python at:
+    #https://www.analyticsvidhya.com/blog/2014/11/data-science-projects-learn/
+
+#%% 
+###############################
+# Importing Data and Packages #
+###############################
+
+#Lesson 2
+
+# Import the Pandas library
+import pandas as pd
+
+# Load the train and test datasets to create two DataFrames
+train_url = "http://s3.amazonaws.com/assets.datacamp.com/course/Kaggle/train.csv"
+train = pd.read_csv(train_url)
+
+test_url = "http://s3.amazonaws.com/assets.datacamp.com/course/Kaggle/test.csv"
+test = pd.read_csv(test_url)
+
+#Print the `head` of the train and test dataframes
+print(train.head())
+print(test.head())
+
+
+# NOTE: 'train' and 'test' are DataFrames! 
+#%%
+
+######################
+# Describe Your Data #
+######################
+
+#you can easily explore a DataFrame using the .describe() method. 
+#.describe() summarizes the columns/features of the DataFrame, 
+          #including the count of observations, mean, max and so on
+     
+train.describe()        
+        
+#Another useful trick is to look at the dimensions of the DataFrame. 
+#This is done by requesting the .shape attribute of your DataFrame object. 
+    #ex. your_data.shape
+
+train.shape
+
+#%%
+
+###########################################
+# Subsetting Data Based on Dummy Variable #
+###########################################
+
+#Rose vs Jack, or Female vs Male
+
+# How many people in your training set survived the disaster with the Titanic?
+    # use the value_counts() method in combination to select a single column of a DataFrame
+
+# The print() method is only necissary to print the result in the console
+    # in other circumstances it is not necissary
+
+# Passengers that survived vs passengers that passed away
+print(train["Survived"].value_counts())
+
+#similarly, you can do:
+train["Survived"].value_counts() #to just give you the value
+Survival = train["Survived"].value_counts() #to store as a Series
+print(Survival) 
+                
+# As proportions
+print(train["Survived"].value_counts(normalize = True))
+
+# Males that survived vs males that passed away
+print(train["Survived"][train["Sex"] == 'male'].value_counts())
+
+# Females that survived vs Females that passed away
+print(train["Survived"][train["Sex"] == 'female'].value_counts())
+
+# Normalized male survival
+print(train["Survived"][train["Sex"] == 'male'].value_counts(normalize = True))
+
+# Normalized female survival
+print(train["Survived"][train["Sex"] == 'female'].value_counts(normalize = True))
+
+# NOTE: 'Survival' is a Series type of structure
+#%%
+
+###################################################
+# Subsetting Data Based on Newly Created Variable #
+###################################################
+
+#Does age play a role?
+
+#we need to create a column that specifies whether the passenger was a child
+#we'll need to:
+    #(1) Create a new variable
+    #(2) Set value = 1 for each passenger who is a child
+    #(3) 
+
+#add a new column to DataFrame
+    #example: your_data["new_var"] = 0
+
+train["IsChild"] = float('NaN') #we set value to NaN by default 
+
+#assign value to column for observations based on another column's value for that observation
+
+train["IsChild"][train["Age"] < 18] = 1 
+train["IsChild"][train["Age"] > 17] = 0
+     #this gives a warning but the operation seems to work
+     #this warning is sometimes turned off
+     #I think its saying you're setting the value on the copy
+         #this will not update 'live' 
+         #if 'Age' is changed in the future 'IsChild' will not update automatically 
+
+# Print normalized Survival Rates for passengers under 18
+print(train["Survived"][train["IsChild"] == 1].value_counts(normalize = True))
+
+# Print normalized Survival Rates for passengers 18 or older
+print(train["Survived"][train["IsChild"] == 0].value_counts(normalize = True))
+
+
+####################
+# First Prediction #
+####################
+
+# before we saw that:
+    # the chance of a male surviving were < .5
+    # the chance of a female surviving were >.5
+# we construct our first model, using passenger sex as the sole indicator of survival
+
+
+# Create a copy of test: test_one
+test_one = test
+
+# Initialize a Survived column to 0
+test_one["Survived"] = 0
+
+# Set Survived to 1 if Sex equals "female" and print the `Survived` column from `test_one`
+test_one["Survived"][test_one["Sex"] == "female"] = 1
+print(test_one["Survived"])
+
